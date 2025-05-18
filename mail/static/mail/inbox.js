@@ -14,6 +14,9 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+  // حذف div پیام اصلی اگر وجود دارد
+  const oldDiv = document.getElementById('original-message');
+  if (oldDiv) oldDiv.remove();
 }
 
 function view_email(id, mailbox = null) {
@@ -83,7 +86,22 @@ function view_email(id, mailbox = null) {
         document.querySelector('#compose-recipients').value = email.sender;
         let subject = email.subject.startsWith("Re:") ? email.subject : "Re: " + email.subject;
         document.querySelector('#compose-subject').value = subject;
-        document.querySelector('#compose-body').value = ''; // باکس پیام خالی
+
+        // حذف هر div قبلی
+        const oldDiv = document.getElementById('original-message');
+        if (oldDiv) oldDiv.remove();
+
+        // ساخت div فقط‌خواندنی برای متن اصلی ایمیل
+        const originalDiv = document.createElement('div');
+        originalDiv.id = 'original-message';
+        originalDiv.className = "alert alert-secondary mb-2";
+        originalDiv.style.fontSize = "0.95rem";
+        originalDiv.innerText = `On ${email.timestamp}, ${email.sender} wrote:\n${email.body}`;
+
+        // قرار دادن div فقط‌خواندنی بالای باکس ریپلای
+        const composeBody = document.querySelector('#compose-body');
+        composeBody.value = '';
+        composeBody.parentNode.insertBefore(originalDiv, composeBody);
       });
       document.querySelector('#email-detail-view').append(btn_reply);
 
@@ -227,6 +245,13 @@ function getCSRFToken() {
         break;
       }
     }
+  }
+  return cookieValue;
+}
+
+
+
+
   }
   return cookieValue;
 }
